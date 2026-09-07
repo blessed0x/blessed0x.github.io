@@ -1,0 +1,96 @@
+<!doctype html>
+<html lang="en" class="no-js">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>A headless Scratch VM over MCP: 112 tools for AI agents to build &amp; publish Scratch projects — blessed0x blog</title>
+  <meta name="description" content="scratch-unified-mcp is the first standalone headless Scratch VM over the Model Context Protocol — 112 MCP tools for AI agents to load, playtest, inspect, and publish Scratch projects with no browser attached.">
+  <meta name="robots" content="index, follow">
+  <link rel="canonical" href="https://blessed0x.github.io/blog/headless-scratch-vm-over-mcp.html">
+  <meta property="og:type" content="article">
+  <meta property="og:title" content="A headless Scratch VM over MCP: 112 tools for AI agents to build &amp; publish Scratch projects">
+  <meta property="og:description" content="The first standalone headless Scratch VM over the Model Context Protocol. Load a .sb3, press green flag, step frames, read threads — from tool calls.">
+  <meta property="og:url" content="https://blessed0x.github.io/blog/headless-scratch-vm-over-mcp.html">
+  <link rel="stylesheet" href="/assets/css/style.css">
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "Article",
+    "headline": "A headless Scratch VM over MCP: 112 tools for AI agents to build and publish Scratch projects",
+    "description": "scratch-unified-mcp is the first standalone headless Scratch VM over the Model Context Protocol — 112 MCP tools for AI agents to build, playtest, inspect, and publish Scratch projects with no browser attached.",
+    "datePublished": "2026-09-07",
+    "dateModified": "2026-09-07",
+    "author": { "@type": "Person", "name": "blessed0x", "url": "https://github.com/blessed0x" },
+    "publisher": { "@type": "Person", "name": "blessed0x", "url": "https://blessed0x.github.io/" },
+    "mainEntityOfPage": "https://blessed0x.github.io/blog/headless-scratch-vm-over-mcp.html",
+    "about": ["Model Context Protocol", "Scratch", "TurboWarp", "headless VM", "AI agents"]
+  }
+  </script>
+</head>
+<body class="blog-page">
+  <a class="skip-link" href="#main">Skip to content</a>
+  <nav class="blog-nav">
+    <div class="container blog-nav-inner">
+      <a class="logo" href="/" aria-label="blessed0x home"><span class="logo-mark">0x</span>blessed0x</a>
+      <a class="ulink" href="/blog/">← all posts</a>
+    </div>
+  </nav>
+
+  <main id="main" class="post">
+    <p class="post-kicker">blog / mcp</p>
+    <h1>A headless Scratch VM over MCP: 112 tools for AI agents to build and publish Scratch projects</h1>
+    <p class="post-meta">blessed0x · 2026-09-07 · ~6 min read · <a href="https://github.com/blessed0x/scratch-unified-mcp">scratch-unified-mcp ↗</a></p>
+
+    <p><strong>scratch-unified-mcp</strong> is the first standalone <strong>headless Scratch VM exposed over the Model Context Protocol</strong> — 112 tools behind one stdio command that let an AI agent load a <code>.sb3</code>, press the green flag, click sprites, step frames, read every live thread, and watch variables change. No browser attached. Everything assertable from a tool call.</p>
+
+    <p>There were already Scratch tool ecosystems — but each one covered a slice. One talked to the Scratch website. One edited blocks with a headless VM. One converted Python to blocks. None covered the whole loop, and switching between three servers with three naming schemes killed momentum. scratch-unified-mcp merges all three behind a single transport: <code>python3 -m scratch_unified</code>.</p>
+
+    <h2>Why a headless VM is the piece that was missing</h2>
+    <p>Driving Scratch through the website API only gets you so far: you can read a project and write a project, but you can't <em>run</em> it and see what actually happens. The piece that didn't exist anywhere else is a headless <a href="https://turbowarp.org/">TurboWarp</a> <code>scratch-vm</code> you can drive and inspect over MCP — load a project, run it, and get back an ordered timeline of what fired: <code>say</code> bubbles, broadcasts, questions and answers, errors.</p>
+
+    <h2>The VM tool surface</h2>
+    <p>The <code>sb3_*</code> family (60 tools, proxied to a lazily-spawned Node sidecar running interpreter-mode TurboWarp) is where the magic lives:</p>
+    <ul>
+      <li><code>sb3_vm_load</code> / <code>sb3_vm_green_flag</code> — load a project, press the flag (clears bubbles, questions, errors)</li>
+      <li><code>sb3_vm_run</code> — advance N seconds or frames, paced or flat-out, returning state plus an ordered event timeline</li>
+      <li><code>sb3_vm_state</code> — full snapshot: targets (x/y/vars/lists/costume), monitors, bubbles, question, thread count, errors</li>
+      <li><code>sb3_vm_threads</code> — every live thread: target, clone flag, starting hat, stack depth, status, kill flag</li>
+      <li><code>sb3_vm_step_frame</code> — exactly one frame, with before/after counts and the delta</li>
+      <li><code>sb3_vm_input</code> — keys, mouse position and clicks in stage coordinates, <code>ask</code> answers — including a click shim so <code>when this sprite clicked</code> actually fires headless</li>
+      <li><code>sb3_vm_seed</code> — deterministic PRNG (mulberry32), so the same seed gives the same run</li>
+      <li><code>sb3_vm_watch</code> — poll-and-diff variable watcher, per-clone capable</li>
+      <li><code>sb3_vm_pen_png</code> — pen raster as PNG base64; <code>sb3_vm_mix_wav</code> — an offline audio mix as WAV</li>
+    </ul>
+
+    <h2>The gaps are patched, not hidden</h2>
+    <p>Running a VM with no renderer means upstream <code>touching</code> always returns false, JIT mode trips false <code>pick random</code> alarms, and clicks never land. The project patches these instead of pretending they don't exist: a distance-based touching fallback, a sprite-click shim, broadcast logging via wrapped <code>startHats</code>, interpreter mode, and a seeded RNG where <code>scratch-vm</code> has none. Deterministic in, deterministic out.</p>
+
+    <h2>Getting started</h2>
+    <p>Point any MCP client at it:</p>
+<pre><code>git clone https://github.com/blessed0x/scratch-unified-mcp
+cd scratch-unified-mcp && pip install -e .
+# optional: clone the three upstream reference repos (see README)
+
+// MCP client config
+{ "mcpServers": { "scratch-unified": {
+    "command": "python3",
+    "args": ["-m", "scratch_unified"],
+    "cwd": "/path/to/scratch-unified-mcp",
+    "timeout": 600000
+} } }</code></pre>
+    <p>The verification suite backs it up: 34 offline checks on the tool surface, 41 runtime checks against a live headless VM playtest, and a 42-check static gate on the game generator that regenerates the demo <code>.sb3</code>. Full per-tool reference lives in <code>docs/IDENTIFIERS.md</code>.</p>
+
+    <h2>Where this lands</h2>
+    <p>An agent loop that can build a Scratch project, run it headlessly, read the screens, and iterate until the tests pass — then publish. That's the whole loop, and it's open source on <a href="https://github.com/blessed0x/scratch-unified-mcp">github.com/blessed0x/scratch-unified-mcp</a>. AI agents get real tools; Scratch gets a test runner it never had.</p>
+
+    <p class="post-cta">→ <a href="/">blessed0x arsenal</a> · <a href="https://github.com/blessed0x">more on GitHub</a></p>
+  </main>
+
+  <footer class="footer" style="border-top:1px solid rgba(236,236,236,.12)">
+    <div class="container footer-bottom" style="display:flex;justify-content:space-between;flex-wrap:wrap;gap:12px">
+      <span>© 2026 blessed0x · built from scratch — no frameworks</span>
+      <a href="/blog/">blog</a> · <a href="/">home</a>
+    </div>
+  </footer>
+</body>
+</html>
