@@ -6,17 +6,20 @@
   <title>0x404 — Not Found · Blessed0x</title>
   <meta name="robots" content="noindex">
   <link rel="stylesheet" href="/assets/css/style.css">
+  <style>
+    body { background: var(--ink); }
+    .error-wrap { min-height: 100vh; display: flex; flex-direction: column; justify-content: center; }
+  </style>
 </head>
 <body>
-  <main class="hero" style="min-height:70vh;display:flex;flex-direction:column;align-items:center;justify-content:center;">
-    <p class="error-code">0x404</p>
-    <p class="error-text">segfault: page not found. the bytes you're after never made it into memory.</p>
-    <pre class="terminal" aria-label="error output"><code><span class="prompt">$</span> gdb ./site
-(gdb) run /missing-page
-Program received signal SIGSEGV, Segmentation fault.
-0x0000000000000404 in ?? ()
-(gdb) quit</code></pre>
-    <p><a href="/">← back to blessed0x</a></p>
+  <main class="container error-wrap">
+    <p class="kicker" style="color: var(--neon); margin-bottom: 24px;">error/ — segfault</p>
+    <p class="error-code" style="font-family: var(--disp); font-weight: 300; line-height: 0.85; letter-spacing: -0.03em;">0x404</p>
+    <p style="color: var(--grey); max-width: 420px; margin: 40px 0 48px;">The bytes you're after never made it into memory. Page not found, exit code 404 — but the door back is right here.</p>
+    <div style="display: flex; gap: 32px; align-items: center;">
+      <a class="pill" href="/">back to blessed0x <span class="arr">→</span></a>
+      <a class="ulink" href="https://github.com/blessed0x" rel="external" style="color: var(--paper);">github <span class="arr">↗</span></a>
+    </div>
   </main>
 </body>
 </html>

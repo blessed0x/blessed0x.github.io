@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en">
+<html lang="en" class="no-js">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -10,22 +10,21 @@
   <link rel="canonical" href="https://blessed0x.github.io/">
   <link rel="sitemap" type="application/xml" title="Sitemap" href="/sitemap.xml">
 
-  <!-- Open Graph -->
   <meta property="og:type" content="website">
   <meta property="og:title" content="Blessed0x — iOS Reverse Engineering · Go · macOS Debloating">
   <meta property="og:description" content="Open-source iOS reverse-engineering tooling: inject tweaks &amp; dylibs into IPA files, debloat macOS, and run Scratch headlessly over MCP.">
   <meta property="og:url" content="https://blessed0x.github.io/">
   <meta property="og:site_name" content="Blessed0x">
-
-  <!-- Twitter -->
   <meta name="twitter:card" content="summary">
   <meta name="twitter:title" content="Blessed0x — iOS Reverse Engineering · Go · macOS Debloating">
   <meta name="twitter:description" content="Open-source iOS reverse-engineering tooling: inject tweaks &amp; dylibs into IPA files, debloat macOS, run Scratch headlessly over MCP.">
 
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500&family=Inter+Tight:wght@300;400;500&family=Fragment+Mono:ital@0;1&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/assets/css/style.css">
-  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%23131336'/%3E%3Ctext x='16' y='22' font-family='monospace' font-size='14' font-weight='bold' fill='%23E100FF' text-anchor='middle'%3E0x%3C/text%3E%3C/svg%3E">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='16' fill='%23CEFF00'/%3E%3Ctext x='16' y='22' font-family='monospace' font-size='13' font-weight='bold' fill='%23141414' text-anchor='middle'%3E0x%3C/text%3E%3C/svg%3E">
 
-  <!-- Structured data -->
   <script type="application/ld+json">
   {
     "@context": "https://schema.org",
@@ -46,120 +45,303 @@
     "url": "https://blessed0x.github.io/"
   }
   </script>
+  <script>document.documentElement.classList.replace('no-js', 'js');</script>
 </head>
 <body>
   <a class="skip-link" href="#main">Skip to content</a>
 
-  <header class="site-header">
-    <nav class="nav" aria-label="Primary">
-      <a class="nav-brand" href="/">blessed0x<span class="cursor">_</span></a>
-      <ul class="nav-links">
-        <li><a href="#about">whoami</a></li>
-        <li><a href="#projects">arsenal</a></li>
-        <li><a href="#skills">tooling</a></li>
-        <li><a href="#contact">contact</a></li>
-      </ul>
-    </nav>
+  <header class="nav" id="nav">
+    <div class="nav-inner">
+      <a class="logo" href="#top" aria-label="blessed0x home">
+        <span class="logo-mark">0x</span>blessed0x
+      </a>
+      <nav aria-label="Primary">
+        <ul class="nav-links" id="navLinks">
+          <li><a href="#arsenal">arsenal</a></li>
+          <li><a href="#why">why</a></li>
+          <li><a href="#stack">stack</a></li>
+          <li><a href="#ship">ship</a></li>
+          <li><a href="#faq">faq</a></li>
+        </ul>
+      </nav>
+      <div class="nav-cta">
+        <a class="pill" href="#contact">Get A Demo <span class="arr">→</span></a>
+        <button class="nav-burger" id="navBurger" aria-label="Menu" aria-expanded="false">
+          <span></span><span></span><span></span>
+        </button>
+      </div>
+    </div>
   </header>
 
   <main id="main">
     <!-- HERO -->
-    <section class="hero" aria-label="Introduction">
-      <h1 class="hero-name">Blessed0x</h1>
-      <p class="hero-tagline">iOS reverse engineering · Go · macOS debloating</p>
-      <pre class="terminal" aria-label="terminal introduction"><code><span class="prompt">$</span> whoami
-blessed0x · indie dev, iOS RE nerd, Go purist
-
-<span class="prompt">$</span> cat 道.md
-· everything is a file: IPA is a zip, signatures are DER, firmware is tar. open them.
-· one binary walks into any machine. no python env, no drama.
-· converters stay byte-faithful to upstream tools or the diff goes in the docs.
-· behavior change means test first. network paths get fakes, always.
-
-<span class="prompt">$</span> ./blessed0x --stack
-<span class="ok">✓</span> dylib injection     <span class="ok">✓</span> Mach-O &amp; codesign
-<span class="ok">✓</span> Go tooling          <span class="ok">✓</span> macOS internals</code></pre>
-      <p class="hero-text">I put dylibs where they don't belong. I write reverse-engineering tooling that ships as a single static binary, keeps its bytes honest, and never asks for a Python environment. Everything here is open source, built from scratch, and aimed at people who'd rather read a hex dump than a changelog.</p>
-    </section>
-
-    <!-- PROJECTS -->
-    <section id="projects" class="section" aria-label="Projects">
-      <h2 class="section-title">// arsenal</h2>
-      <p class="section-sub">Open-source tools, in pure Go and shell.</p>
-
-      <div class="grid">
-        <article class="card">
-          <header class="card-head">
-            <h3><a href="https://github.com/blessed0x/xkvm-ios-injector" rel="external">xkvm-ios-injector</a></h3>
-            <span class="lang">Go</span>
-          </header>
-          <p class="card-desc">Inject tweaks &amp; dylibs into IPA files — a pure-Go rewrite of the cyan/pyzule-rw bloodline. Sideload injected apps, extract tweaks back out, and convert between jailbreak package layouts. Byte-faithful to upstream tools, no Python required.</p>
-          <ul class="tags" aria-label="topics">
-            <li>ios</li><li>jailbreak</li><li>tweak</li><li>dylib</li><li>ipa-injection</li><li>sideloading</li>
-          </ul>
-        </article>
-
-        <article class="card">
-          <header class="card-head">
-            <h3><a href="https://github.com/blessed0x/macos-debloater" rel="external">macos-debloater</a></h3>
-            <span class="lang">Shell</span>
-          </header>
-          <p class="card-desc">Debloat macOS — disable the services you don't use. Mode 1–4, TUI, enterprise config, or manual pick. Trim launchd agents, cut background noise, and take back RAM without touching what you actually need.</p>
-          <ul class="tags" aria-label="topics">
-            <li>macos</li><li>debloat</li><li>launchd</li><li>privacy</li><li>optimization</li><li>tui</li>
-          </ul>
-        </article>
-
-        <article class="card">
-          <header class="card-head">
-            <h3><a href="https://github.com/blessed0x/scratch-unified-mcp" rel="external">scratch-unified-mcp</a></h3>
-            <span class="lang">Python</span>
-          </header>
-          <p class="card-desc">The first standalone headless Scratch VM over MCP — 108 tools for AI agents to build, playtest, and publish Scratch projects. Turbowarp-powered, no browser needed, fully scriptable.</p>
-          <ul class="tags" aria-label="topics">
-            <li>mcp</li><li>scratch</li><li>ai-agents</li><li>headless-vm</li><li>turbowarp</li>
-          </ul>
-        </article>
+    <section class="hero" id="top">
+      <div class="container">
+        <p class="hero-meta kicker reveal"><span class="dot"></span> blessed0x / platform — reverse engineering that ships</p>
+        <h1 class="reveal" style="--d:.05s">Put dylibs where they don't belong. <span class="neon-word">Ship the bytes.</span></h1>
+        <p class="hero-sub reveal" style="--d:.12s">iOS reverse-engineering tooling in pure Go, macOS debloating, and a headless Scratch VM over MCP. One static binary walks into any machine. No python env, no drama.</p>
+        <div class="hero-cta reveal" style="--d:.18s">
+          <a class="pill" href="#arsenal">See the arsenal <span class="arr">→</span></a>
+          <a class="ulink" href="https://github.com/blessed0x" rel="external">github.com/blessed0x <span class="arr">↗</span></a>
+        </div>
+        <div class="barcode" aria-hidden="true"></div>
       </div>
     </section>
 
-    <!-- SKILLS -->
-    <section id="skills" class="section" aria-label="Skills and tooling">
-      <h2 class="section-title">// tooling</h2>
-      <div class="skill-list">
-        <div class="skill-group">
-          <h3>Reverse engineering</h3>
-          <p>Mach-O internals, dylib injection, IPA tweak injection, codesign forgery, binary patching, firmware archaeology.</p>
-        </div>
-        <div class="skill-group">
-          <h3>Languages</h3>
-          <p>Go (the daily driver), shell, Python. Static binaries, no runtime drama.</p>
-        </div>
-        <div class="skill-group">
-          <h3>Platforms</h3>
-          <p>iOS &amp; macOS internals — launchd, CoreDevice, usbmuxd, entitlements, sandboxing. Linux when it behaves.</p>
-        </div>
-        <div class="skill-group">
-          <h3>Protocols &amp; plumbing</h3>
-          <p>Model Context Protocol (MCP) servers, USB device pairing, byte-exact format conversion.</p>
+    <!-- ARSENAL / projects (steps, light) -->
+    <section class="band band-light" id="arsenal">
+      <div class="container">
+        <header class="section-head reveal">
+          <p class="kicker">arsenal/ — open source, from scratch</p>
+          <h2>Three tools, <span class="hl">zero</span> runtime drama.</h2>
+        </header>
+        <div class="steps">
+          <article class="step reveal">
+            <span class="num">01 // iOS</span>
+            <h3>xkvm-ios-injector</h3>
+            <p>Inject tweaks &amp; dylibs into IPA files. Pure-Go rewrite of the cyan/pyzule-rw bloodline — sideload injected apps, extract tweaks back out, convert between jailbreak package layouts. Byte-faithful to upstream tools.</p>
+            <a class="ulink" href="https://github.com/blessed0x/xkvm-ios-injector" rel="external">repository <span class="arr">↗</span></a>
+          </article>
+          <article class="step reveal" style="--d:.1s">
+            <span class="num">02 // macOS</span>
+            <h3>macos-debloater</h3>
+            <p>Disable the services you don't use. Mode 1–4, TUI, enterprise config, or manual pick. Trim launchd agents and take back RAM without touching what you actually need.</p>
+            <a class="ulink" href="https://github.com/blessed0x/macos-debloater" rel="external">repository <span class="arr">↗</span></a>
+          </article>
+          <article class="step reveal" style="--d:.2s">
+            <span class="num">03 // MCP</span>
+            <h3>scratch-unified-mcp</h3>
+            <p>First standalone headless Scratch VM over MCP — 108 tools for AI agents to build, playtest, and publish Scratch projects. Turbowarp-powered, no browser needed.</p>
+            <a class="ulink" href="https://github.com/blessed0x/scratch-unified-mcp" rel="external">repository <span class="arr">↗</span></a>
+          </article>
         </div>
       </div>
     </section>
 
-    <!-- CONTACT -->
-    <section id="contact" class="section" aria-label="Contact">
-      <h2 class="section-title">// contact</h2>
-      <p class="contact-text">Found a bug, want a feature, or just want to talk binaries? The inbox is open.</p>
-      <ul class="contact-links">
-        <li><a href="https://github.com/blessed0x" rel="external">github.com/blessed0x</a></li>
-        <li><a href="mailto:xscope@proton.me">xscope@proton.me</a></li>
-      </ul>
+    <!-- WHY / feature rows (white) -->
+    <section class="band band-white" id="why">
+      <div class="container">
+        <header class="section-head reveal">
+          <p class="kicker">why blessed0x/</p>
+          <h2>Reasons a <span class="hl hl-dark">byte-faithful</span> rewrite wins.</h2>
+        </header>
+        <div class="feat-list">
+          <article class="feat reveal">
+            <span class="num">01</span>
+            <div>
+              <h3>One binary, no environment</h3>
+              <p class="feat-desc">Static Go builds. No python, no node, no dependency roulette. The tool behaves the same on your machine as it does in CI.</p>
+            </div>
+            <a class="ulink feat-go" href="https://github.com/blessed0x/xkvm-ios-injector" rel="external">code <span class="arr">→</span></a>
+          </article>
+          <article class="feat reveal">
+            <span class="num">02</span>
+            <div>
+              <h3>Diff-or-document discipline</h3>
+              <p class="feat-desc">Converters stay byte-faithful to upstream tools. When behavior must differ, the diff goes in the docs — never silent.</p>
+            </div>
+          </article>
+          <article class="feat reveal">
+            <span class="num">03</span>
+            <div>
+              <h3>Network paths get fakes, always</h3>
+              <p class="feat-desc">Testable by design. Real devices optional, mock layers first-class. Behavior change means tests run first.</p>
+            </div>
+          </article>
+          <article class="feat reveal">
+            <span class="num">04</span>
+            <div>
+              <h3>Mach-O, not magic</h3>
+              <p class="feat-desc">Signatures are DER, IPAs are zips, firmware is tar. Everything is a file — open it, read it, patch it.</p>
+            </div>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <!-- STACK / capability cards (dark) -->
+    <section class="band band-dark" id="stack">
+      <div class="container">
+        <header class="section-head reveal">
+          <p class="kicker">stack/ — under the hood</p>
+          <h2>Signals that drive <span class="neon-word">accurate</span> tooling.</h2>
+        </header>
+        <div class="cards">
+          <article class="card reveal">
+            <span class="tag">Mach-O · codesign</span>
+            <h3>dylib injection</h3>
+            <p>Load-command surgery and code-signature handling on real binaries — inject, extract, and re-sign without breaking entitlements.</p>
+            <a href="https://github.com/blessed0x/xkvm-ios-injector" rel="external">explore <span class="arr">→</span></a>
+          </article>
+          <article class="card reveal" style="--d:.08s">
+            <span class="tag">launchd · macOS</span>
+            <h3>service debloating</h3>
+            <p>Know which daemons matter. Targeted launchd control with modes from one-click to enterprise config files.</p>
+            <a href="https://github.com/blessed0x/macos-debloater" rel="external">explore <span class="arr">→</span></a>
+          </article>
+          <article class="card reveal" style="--d:.16s">
+            <span class="tag">MCP · headless</span>
+            <h3>protocol plumbing</h3>
+            <p>Model Context Protocol servers that give agents real tools — 108 of them on a headless Scratch VM.</p>
+            <a href="https://github.com/blessed0x/scratch-unified-mcp" rel="external">explore <span class="arr">→</span></a>
+          </article>
+          <article class="card reveal" style="--d:.24s">
+            <span class="tag">Go · single static</span>
+            <h3>ships anywhere</h3>
+            <p>No runtime. No interpreter to babysit. Cross-compile once, deploy on anything that speaks the same bytes.</p>
+            <a href="#ship" rel="external">see it ship <span class="arr">→</span></a>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <!-- SHIP / use cases (light rows) -->
+    <section class="band band-light" id="ship">
+      <div class="container">
+        <header class="section-head reveal">
+          <p class="kicker">ship/ — where this lands</p>
+          <h2>Work that actually <span class="hl">ships</span>.</h2>
+        </header>
+        <div class="feat-list">
+          <article class="feat reveal">
+            <span class="num">/ side-loading</span>
+            <div>
+              <h3>IPA tweak injection pipelines</h3>
+              <p class="feat-desc">Sideload injected apps on iOS 17+ CoreDevice tunnels without babysitting Xcode.</p>
+            </div>
+          </article>
+          <article class="feat reveal">
+            <span class="num">/ debloat</span>
+            <div>
+              <h3>macOS that behaves</h3>
+              <p class="feat-desc">Cut background noise, reclaim RAM, keep the services you actually use.</p>
+            </div>
+          </article>
+          <article class="feat reveal">
+            <span class="num">/ agents</span>
+            <div>
+              <h3>AI agents that build Scratch</h3>
+              <p class="feat-desc">Playtest and publish Scratch projects from an agent loop, no browser attached.</p>
+            </div>
+          </article>
+          <article class="feat reveal">
+            <span class="num">/ bytes</span>
+            <div>
+              <h3>Binary archaeology</h3>
+              <p class="feat-desc">If a format exists, it can be opened, diffed, and explained.</p>
+            </div>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <!-- STATEMENT + chips -->
+    <section class="band band-dark statement">
+      <div class="container">
+        <p class="kicker reveal">about/ — the one-line version</p>
+        <h2 class="reveal">Blessed0x can tell the difference between code that <span class="neon-word">works</span> and code that merely compiles.</h2>
+        <div class="chips" style="margin-top:64px">
+          <span class="chip reveal">Go</span>
+          <span class="chip reveal" style="--d:.05s">Mach-O</span>
+          <span class="chip reveal" style="--d:.1s">dylib</span>
+          <span class="chip reveal" style="--d:.15s">launchd</span>
+          <span class="chip reveal" style="--d:.2s">MCP</span>
+          <span class="chip reveal" style="--d:.25s">IPA</span>
+          <span class="chip reveal" style="--d:.3s">codesign</span>
+          <span class="chip reveal" style="--d:.35s">shell</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- FAQ (light) -->
+    <section class="band band-white" id="faq">
+      <div class="container">
+        <header class="section-head reveal">
+          <p class="kicker">faq/ — answers</p>
+          <h2>Questions people <span class="hl hl-dark">actually</span> ask.</h2>
+        </header>
+        <div class="faq" id="faqList">
+          <article class="faq-item reveal">
+            <button class="faq-q" aria-expanded="false">What does "byte-faithful" mean, concretely?<span class="ico">+</span></button>
+            <div class="faq-a"><div class="faq-a-inner"><p>When a converter rewrites an IPA, a signature, or a package layout, the output must match what the upstream tool would produce — down to trailing bytes. If behavior has to differ, the difference is documented in the repo, not smuggled in.</p></div></div>
+          </article>
+          <article class="faq-item reveal">
+            <button class="faq-q" aria-expanded="false">Why Go and not Python or Rust?<span class="ico">+</span></button>
+            <div class="faq-a"><div class="faq-a-inner"><p>One static binary that walks into any machine — no interpreter, no venv, no version roulette. Go cross-compiles to everything and keeps the memory model boring enough to trust at 3am.</p></div></div>
+          </article>
+          <article class="faq-item reveal">
+            <button class="faq-q" aria-expanded="false">Is xkvm-ios-injector a jailbreak tool?<span class="ico">+</span></button>
+            <div class="faq-a"><div class="faq-a-inner"><p>It's a tool for people who reverse-engineer iOS apps and run their own sideloading workflows. It injects dylibs into IPA files you already have the right to modify. Sign and run responsibly.</p></div></div>
+          </article>
+          <article class="faq-item reveal">
+            <button class="faq-q" aria-expanded="false">Can I use these tools in my own projects?<span class="ico">+</span></button>
+            <div class="faq-a"><div class="faq-a-inner"><p>Everything is open source on <a href="https://github.com/blessed0x" rel="external">github.com/blessed0x</a>. Fork it, file issues, send patches. If a converter drifts from upstream, the diff belongs in the docs.</p></div></div>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <!-- FINAL CTA (dark) -->
+    <section class="band band-dark statement" id="contact">
+      <div class="container">
+        <p class="kicker reveal">contact/ — inbox open</p>
+        <h2 class="reveal" style="--d:.05s">See your binaries <span class="neon-word">behave</span>.</h2>
+        <div class="hero-cta reveal" style="--d:.15s">
+          <a class="pill" href="mailto:xscope@proton.me">email me <span class="arr">→</span></a>
+          <a class="ulink" href="https://github.com/blessed0x" rel="external" style="color:var(--paper)">github.com/blessed0x <span class="arr">↗</span></a>
+        </div>
+      </div>
     </section>
   </main>
 
-  <footer class="site-footer">
-    <p>Built from scratch. No frameworks, no Jekyll, no JavaScript — just semantic HTML and one CSS file.</p>
-    <p class="footer-meta">Blessed0x · <a href="/sitemap.xml">sitemap</a> · <a href="/robots.txt">robots</a></p>
+  <footer class="footer">
+    <div class="container">
+      <div class="footer-grid">
+        <div class="footer-brand">
+          <a class="logo" href="#top"><span class="logo-mark">0x</span>blessed0x</a>
+          <p>Independent iOS reverse engineering &amp; Go tooling. Built from scratch, byte by byte.</p>
+        </div>
+        <div class="footer-col">
+          <h4>arsenal</h4>
+          <ul>
+            <li><a href="https://github.com/blessed0x/xkvm-ios-injector" rel="external">xkvm-ios-injector</a></li>
+            <li><a href="https://github.com/blessed0x/macos-debloater" rel="external">macos-debloater</a></li>
+            <li><a href="https://github.com/blessed0x/scratch-unified-mcp" rel="external">scratch-unified-mcp</a></li>
+          </ul>
+        </div>
+        <div class="footer-col">
+          <h4>stack</h4>
+          <ul>
+            <li><a href="#stack">Mach-O · codesign</a></li>
+            <li><a href="#stack">launchd · macOS</a></li>
+            <li><a href="#stack">MCP · headless</a></li>
+          </ul>
+        </div>
+        <div class="footer-col">
+          <h4>company</h4>
+          <ul>
+            <li><a href="#why">why</a></li>
+            <li><a href="#faq">faq</a></li>
+            <li><a href="mailto:xscope@proton.me">contact</a></li>
+          </ul>
+        </div>
+        <div class="footer-col">
+          <h4>sitemap</h4>
+          <ul>
+            <li><a href="/sitemap.xml">sitemap.xml</a></li>
+            <li><a href="/robots.txt">robots.txt</a></li>
+          </ul>
+        </div>
+      </div>
+      <div class="footer-giant" aria-hidden="true">blessed<span class="neon">0x_</span></div>
+      <div class="footer-bottom">
+        <span>© <span id="year">2026</span> blessed0x · built from scratch — no frameworks, no JS libs except one smooth-scroll</span>
+        <a href="#top">back to top ↑</a>
+      </div>
+    </div>
   </footer>
+
+  <script src="/assets/vendor/lenis.min.js"></script>
+  <script src="/assets/js/main.js"></script>
 </body>
 </html>
