@@ -1,0 +1,100 @@
+<!doctype html>
+<html lang="en" class="no-js">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>pyzule-rw vs xkvm-ios-injector: the pure-Go IPA tweak injector cyan asked for — blessed0x blog</title>
+  <meta name="description" content="xkvm-ios-injector is the pure-Go rewrite the pyzule-rw author literally asked for: inject dylibs, debs, frameworks and bundles into IPA files as one static binary — no Python, no pipx, no venv.">
+  <meta name="robots" content="index, follow">
+  <link rel="canonical" href="https://blessed0x.github.io/blog/pyzule-vs-xkvm-ios-injector.html">
+  <meta property="og:type" content="article">
+  <meta property="og:title" content="pyzule-rw vs xkvm-ios-injector: the pure-Go IPA tweak injector cyan asked for">
+  <meta property="og:description" content="The pyzule lineage is Python. xkvm-ios-injector is the byte-faithful pure-Go rewrite — inject dylibs into IPA files, no runtime to babysit.">
+  <meta property="og:url" content="https://blessed0x.github.io/blog/pyzule-vs-xkvm-ios-injector.html">
+  <link rel="stylesheet" href="/assets/css/style.css">
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "Article",
+    "headline": "pyzule-rw vs xkvm-ios-injector: the pure-Go IPA tweak injector cyan asked for",
+    "description": "xkvm-ios-injector is a pure-Go rewrite of the pyzule-rw/cyan bloodline: inject dylibs and tweaks into IPA files as one static binary, no Python environment.",
+    "datePublished": "2026-09-07",
+    "dateModified": "2026-09-07",
+    "author": { "@type": "Person", "name": "blessed0x", "url": "https://github.com/blessed0x" },
+    "publisher": { "@type": "Person", "name": "blessed0x", "url": "https://blessed0x.github.io/" },
+    "mainEntityOfPage": "https://blessed0x.github.io/blog/pyzule-vs-xkvm-ios-injector.html",
+    "about": ["pyzule-rw", "cyan", "IPA tweak injection", "dylib injection", "iOS sideloading"]
+  }
+  </script>
+</head>
+<body class="blog-page">
+  <a class="skip-link" href="#main">Skip to content</a>
+  <nav class="blog-nav">
+    <div class="container blog-nav-inner">
+      <a class="logo" href="/" aria-label="blessed0x home"><span class="logo-mark">0x</span>blessed0x</a>
+      <a class="ulink" href="/blog/">← all posts</a>
+    </div>
+  </nav>
+
+  <main id="main" class="post">
+    <p class="post-kicker">blog / ios-re</p>
+    <h1>pyzule-rw vs xkvm-ios-injector: the pure-Go IPA tweak injector cyan asked for</h1>
+    <p class="post-meta">blessed0x · 2026-09-07 · ~7 min read · <a href="https://github.com/blessed0x/xkvm-ios-injector">xkvm-ios-injector ↗</a></p>
+
+    <p>Go read the <a href="https://github.com/asdfzxcvbn/pyzule-rw">pyzule-rw</a> README. Near the top, the author of the current mainstream IPA tweak-injection toolchain writes, verbatim:</p>
+
+    <blockquote>"wouldn't a go rewrite be really cool? (or in rust or something, adding features to this makes me realize PYTHONM FUCKING SUCKS SOMEONE PLEASE REWRITE IN LIKE ANY COMPILED AND STATICALLY TYPED LANGUAGE PLEASE!!!!!!!"</blockquote>
+
+    <p><strong>xkvm-ios-injector is that rewrite.</strong> Pure Go, one static binary, no Python environment, no pipx, no venv. This post compares the two honestly — what cyan does, what xkvm does, and when each one wins.</p>
+
+    <h2>The lineage, in one paragraph</h2>
+    <p><a href="https://github.com/mpelteshki/Azule">Azule</a> started the "give me an IPA and a tweak, get back an injected IPA" genre. <a href="https://github.com/asdfzxcvbn/pyzule">pyzule</a> cloned it in Python 3, then <a href="https://github.com/asdfzxcvbn/pyzule-rw">pyzule-rw / cyan</a> rewrote it with shareable <code>.cyan</code> config files and a much larger feature surface. Everything in that bloodline is Python — which is exactly the pain the author is screaming about above.</p>
+
+    <h2>What cyan does well</h2>
+    <ul>
+      <li>Injects <code>.deb</code>, <code>.dylib</code>, framework, bundle, and <code>.appex</code> files into IPAs</li>
+      <li>Shareable <code>.cyan</code> configs that capture every option</li>
+      <li>Automatic dependency fixing — swaps in <a href="https://github.com/evelyneee/ellekit/">ElleKit</a> for CydiaSubstrate, handles Cephei and Orion</li>
+      <li>A broad set of convenience flags: change app name/version/bundle id/min-OS, merge plists, add entitlements, thin binaries to arm64, fakesign</li>
+      <li>Runs on Linux, macOS, WSL, and jailbroken iOS</li>
+    </ul>
+    <p>The cost: Python 3.9+ via pipx, plus <code>lief</code> if you want dylib injection on aarch64 Linux, plus a Python environment to babysit on every machine and every CI runner.</p>
+
+    <h2>What xkvm does</h2>
+    <ul>
+      <li>Injects dylibs, debs, frameworks, and bundles with correct load commands (<code>@rpath</code>, <code>@executable_path</code>) and re-signing</li>
+      <li><strong>Extracts</strong> injected tweaks back out of an app — recording where each lived so re-injection is automatic</li>
+      <li>Converts between the three jailbreak layouts (rootful / rootless / roothide) and between <code>.deb</code> and <code>.dylib</code> forms — ports of the ecosystem's own converters</li>
+      <li>Fetches tweaks from Cydia repos by bundle id (Canister / MobileAPT) with dependency recursion</li>
+      <li>Reads and writes the same <code>.cyan</code> config language: generate with <code>cgen</code>, validate with <code>cyan-check</code>, apply with <code>-z</code></li>
+      <li>Deterministic builds: same input, same output, zip-slip-safe extraction, and pure-Go Apple-format code signatures</li>
+    </ul>
+    <p>No Python, no pipx, no <code>lief</code>. One static binary — the behavior is identical on your laptop and in CI. Go 1.26, MIT licensed, macOS primary with a Linux-tested core.</p>
+
+    <h2>Honest tradeoffs</h2>
+    <table>
+      <tr><th></th><th>pyzule-rw / cyan</th><th>xkvm-ios-injector</th></tr>
+      <tr><td>Runtime</td><td>Python 3.9+ (pipx)</td><td>None — static Go binary</td></tr>
+      <tr><td>Config format</td><td><code>.cyan</code></td><td><code>.cyan</code> (cgen / cyan-check / -z)</td></tr>
+      <tr><td>Injection formats</td><td>deb, dylib, framework, bundle, appex</td><td>dylib, deb, framework, bundle</td></tr>
+      <tr><td>Extraction</td><td>—</td><td>Yes, location-aware</td></tr>
+      <tr><td>Jailbreak layout conversion</td><td>—</td><td>rootful ↔ rootless ↔ roothide</td></tr>
+      <tr><td>Convenience flags (icon, plist merge, thinning…)</td><td>Broad</td><td>Focused core (growing)</td></tr>
+      <tr><td>CI-friendliness</td><td>Python env per runner</td><td>Single binary, reproducible</td></tr>
+    </table>
+    <p>Fair warning where cyan still leads: it ships convenience features xkvm doesn't list yet — app icon swaps, Info.plist merges, arm64 thinning. If you need the kitchen sink on a one-off tweak, cyan is the mature choice. If you need <em>repeatable</em>, scriptable, byte-faithful injection in an environment you don't want to babysit — that's the Go slot, and it was empty until now.</p>
+
+    <h2>Which should you pick?</h2>
+    <p><strong>Pick cyan</strong> when you want the broadest flag surface on a manual tweak and already live in a Python ecosystem. <strong>Pick xkvm</strong> when you're building a pipeline: CI jobs, release automation, deterministic outputs, "the same machine as last week, every week." And if you've ever typed <code>pipx install</code> on a fresh box at 1am and watched it fight a Python version — you already know which one you want.</p>
+
+    <p class="post-cta">→ <a href="https://github.com/blessed0x/xkvm-ios-injector">xkvm-ios-injector on GitHub</a> · <a href="/">back to the arsenal</a></p>
+  </main>
+
+  <footer class="footer" style="border-top:1px solid rgba(236,236,236,.12)">
+    <div class="container footer-bottom" style="display:flex;justify-content:space-between;flex-wrap:wrap;gap:12px">
+      <span>© 2026 blessed0x · built from scratch — no frameworks</span>
+      <a href="/blog/">blog</a> · <a href="/">home</a>
+    </div>
+  </footer>
+</body>
+</html>
