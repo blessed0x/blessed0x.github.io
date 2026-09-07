@@ -473,3 +473,6 @@ html.js .reveal.in-view { animation: slideUp 0.55s cubic-bezier(0.4, 0, 0.2, 1) 
 }
 .hero .container { position: relative; z-index: 1; }
 @media (prefers-reduced-motion: reduce) { #hero-field { display: none; } }
+
+/* faq questions as h3 for outline semantics */
+.faq-item h3 { margin: 0; font: inherit; line-height: inherit; }
