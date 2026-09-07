@@ -3,21 +3,21 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Blessed0x — iOS Reverse Engineering · Go · macOS Debloating</title>
-  <meta name="description" content="Blessed0x — indie developer building open-source iOS reverse-engineering tooling. Inject tweaks and dylibs into IPA files, debloat macOS, and run Scratch headlessly over MCP. Pure Go, byte-faithful.">
+  <title>blessed0x arsenal — iOS IPA dylib injector, macOS debloater &amp; Scratch MCP tools in pure Go</title>
+  <meta name="description" content="Pure-Go iOS reverse-engineering tools. Inject dylibs into IPA files, sideload on iOS 17+, debloat macOS launchd services, and run a headless Scratch VM over MCP. One static binary — no Python, no venv, no drama.">
   <meta name="author" content="Blessed0x">
   <meta name="robots" content="index, follow">
   <link rel="canonical" href="https://blessed0x.github.io/">
   <link rel="sitemap" type="application/xml" title="Sitemap" href="/sitemap.xml">
 
   <meta property="og:type" content="website">
-  <meta property="og:title" content="Blessed0x — iOS Reverse Engineering · Go · macOS Debloating">
-  <meta property="og:description" content="Open-source iOS reverse-engineering tooling: inject tweaks &amp; dylibs into IPA files, debloat macOS, and run Scratch headlessly over MCP.">
+  <meta property="og:title" content="blessed0x arsenal — iOS IPA dylib injector, macOS debloater &amp; Scratch MCP tools in pure Go">
+  <meta property="og:description" content="Pure-Go iOS reverse-engineering tools. Inject dylibs into IPA files, sideload on iOS 17+, debloat macOS launchd services, and run a headless Scratch VM over MCP.">
   <meta property="og:url" content="https://blessed0x.github.io/">
   <meta property="og:site_name" content="Blessed0x">
   <meta name="twitter:card" content="summary">
-  <meta name="twitter:title" content="Blessed0x — iOS Reverse Engineering · Go · macOS Debloating">
-  <meta name="twitter:description" content="Open-source iOS reverse-engineering tooling: inject tweaks &amp; dylibs into IPA files, debloat macOS, run Scratch headlessly over MCP.">
+  <meta name="twitter:title" content="blessed0x arsenal — iOS IPA dylib injector, macOS debloater &amp; Scratch MCP tools in pure Go">
+  <meta name="twitter:description" content="Pure-Go iOS reverse-engineering tools. Inject dylibs into IPA files, sideload on iOS 17+, debloat macOS launchd services, and run a headless Scratch VM over MCP.">
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -43,6 +43,59 @@
     "@type": "WebSite",
     "name": "Blessed0x",
     "url": "https://blessed0x.github.io/"
+  }
+  </script>
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "SoftwareApplication",
+    "name": "xkvm-ios-injector",
+    "applicationCategory": "DeveloperApplication",
+    "operatingSystem": "macOS, Linux, Windows",
+    "description": "Pure-Go IPA tweak injector. Inject dylibs into IPA files and sideload on iOS 17+. Byte-faithful pyzule/cyan rewrite.",
+    "url": "https://github.com/blessed0x/xkvm-ios-injector",
+    "author": { "@type": "Person", "name": "blessed0x" },
+    "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" }
+  }
+  </script>
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": [
+      {
+        "@type": "Question",
+        "name": "What does \"byte-faithful\" mean, concretely?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "When a converter rewrites an IPA, a signature, or a package layout, the output must match what the upstream tool would produce — down to trailing bytes. If behavior has to differ, the difference is documented in the repo, not smuggled in."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Why Go and not Python or Rust?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "One static binary that walks into any machine — no interpreter, no venv, no version roulette. Go cross-compiles to everything and keeps the memory model boring enough to trust at 3am."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Is xkvm-ios-injector a jailbreak tool?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "It's a tool for people who reverse-engineer iOS apps and run their own sideloading workflows. It injects dylibs into IPA files you already have the right to modify. Sign and run responsibly."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Can I use these tools in my own projects?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Everything is open source on github.com/blessed0x. Fork it, file issues, send patches. If a converter drifts from upstream, the diff belongs in the docs."
+        }
+      }
+    ]
   }
   </script>
   <script>document.documentElement.classList.replace('no-js', 'js');</script>
@@ -77,8 +130,8 @@
     <!-- HERO -->
     <section class="hero" id="top">
       <div class="container">
-        <p class="hero-meta kicker reveal"><span class="dot"></span> blessed0x / platform — reverse engineering that ships</p>
-        <h1 class="reveal" style="--d:.05s">Put dylibs where they don't belong. <span class="neon-word">Ship the bytes.</span></h1>
+        <p class="hero-meta kicker reveal"><span class="dot"></span> blessed0x / put dylibs where they don't belong</p>
+        <h1 class="reveal" style="--d:.05s">iOS dylib injection, macOS debloating &amp; Scratch MCP — <span class="neon-word">pure Go, ship the bytes.</span></h1>
         <p class="hero-sub reveal" style="--d:.12s">iOS reverse-engineering tooling in pure Go, macOS debloating, and a headless Scratch VM over MCP. One static binary walks into any machine. No python env, no drama.</p>
         <div class="hero-cta reveal" style="--d:.18s">
           <a class="pill" href="#arsenal">See the arsenal <span class="arr">→</span></a>
@@ -98,20 +151,20 @@
         <div class="steps">
           <article class="step reveal">
             <span class="num">01 // iOS</span>
-            <h3>xkvm-ios-injector</h3>
-            <p>Inject tweaks &amp; dylibs into IPA files. Pure-Go rewrite of the cyan/pyzule-rw bloodline — sideload injected apps, extract tweaks back out, convert between jailbreak package layouts. Byte-faithful to upstream tools.</p>
+            <h3>xkvm-ios-injector — inject dylibs &amp; tweaks into IPA files</h3>
+            <p>A pure-Go IPA tweak injector — byte-faithful rewrite of the cyan / pyzule-rw bloodline. Inject dylibs and tweaks into IPA files you own, extract tweaks back out, and convert between jailbreak package layouts. Sideload injected apps on iOS 17+ — no Python, no venv.</p>
             <a class="ulink" href="https://github.com/blessed0x/xkvm-ios-injector" rel="external">repository <span class="arr">↗</span></a>
           </article>
           <article class="step reveal" style="--d:.1s">
             <span class="num">02 // macOS</span>
-            <h3>macos-debloater</h3>
-            <p>Disable the services you don't use. Mode 1–4, TUI, enterprise config, or manual pick. Trim launchd agents and take back RAM without touching what you actually need.</p>
+            <h3>macos-debloater — disable launchd services &amp; reclaim RAM</h3>
+            <p>A macOS debloat tool that disables the background services you don't use. Trim launchd agents and daemons, take back RAM, keep what you actually need. Four modes: one-click presets, a TUI, an enterprise config file, or manual pick.</p>
             <a class="ulink" href="https://github.com/blessed0x/macos-debloater" rel="external">repository <span class="arr">↗</span></a>
           </article>
           <article class="step reveal" style="--d:.2s">
             <span class="num">03 // MCP</span>
-            <h3>scratch-unified-mcp</h3>
-            <p>First standalone headless Scratch VM over MCP — 108 tools for AI agents to build, playtest, and publish Scratch projects. Turbowarp-powered, no browser needed.</p>
+            <h3>scratch-unified-mcp — headless Scratch VM over MCP for AI agents</h3>
+            <p>The first standalone headless Scratch VM over the Model Context Protocol — 108 MCP tools for AI agents to build, playtest, and publish Scratch projects. Turbowarp-powered, no browser attached.</p>
             <a class="ulink" href="https://github.com/blessed0x/scratch-unified-mcp" rel="external">repository <span class="arr">↗</span></a>
           </article>
         </div>
