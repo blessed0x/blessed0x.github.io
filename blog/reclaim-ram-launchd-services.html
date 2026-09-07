@@ -1,0 +1,164 @@
+<!doctype html>
+<html lang="en" class="no-js">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Reclaim RAM on macOS by disabling launchd services — the before/after measurement harness, tested on an 8 GB M1 — blessed0x blog</title>
+  <meta name="description" content="How to measure RAM before and after disabling macOS launchd services: a copy-paste harness, real before numbers from an 8 GB M1 running Sequoia, and the actual 65-service Mode 1 dry-run plan. No invented results.">
+  <meta name="robots" content="index, follow">
+  <link rel="canonical" href="https://blessed0x.github.io/blog/reclaim-ram-launchd-services.html">
+  <meta property="og:type" content="article">
+  <meta property="og:title" content="Reclaim RAM on macOS by disabling launchd services — the measurement harness">
+  <meta property="og:description" content="A copy-paste measurement harness, a real before snapshot from an 8 GB M1, and the exact 65-service dry-run plan. Measure your own machine — no invented numbers.">
+  <meta property="og:url" content="https://blessed0x.github.io/blog/reclaim-ram-launchd-services.html">
+  <link rel="stylesheet" href="/assets/css/style.css">
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "Article",
+    "headline": "Reclaim RAM on macOS by disabling launchd services — the before/after measurement harness",
+    "description": "A copy-paste harness for measuring macOS memory and launchd state before and after debloating, with a real before snapshot from an 8 GB M1 and the resolved 65-service Mode 1 dry-run plan.",
+    "datePublished": "2026-09-07",
+    "dateModified": "2026-09-07",
+    "author": { "@type": "Person", "name": "blessed0x", "url": "https://github.com/blessed0x" },
+    "publisher": { "@type": "Person", "name": "blessed0x", "url": "https://blessed0x.github.io/" },
+    "mainEntityOfPage": "https://blessed0x.github.io/blog/reclaim-ram-launchd-services.html",
+    "about": ["macOS", "launchd", "RAM", "debloating", "vm_stat"]
+  }
+  </script>
+</head>
+<body class="blog-page">
+  <a class="skip-link" href="#main">Skip to content</a>
+  <nav class="blog-nav">
+    <div class="container blog-nav-inner">
+      <a class="logo" href="/" aria-label="blessed0x home"><span class="logo-mark">0x</span>blessed0x</a>
+      <a class="ulink" href="/blog/">← all posts</a>
+    </div>
+  </nav>
+
+  <main id="main" class="post">
+    <p class="post-kicker">blog / macos</p>
+    <h1>Reclaim RAM on macOS by disabling launchd services — the measurement harness, with real before numbers from an 8 GB M1</h1>
+    <p class="post-meta">blessed0x · 2026-09-07 · ~8 min read · <a href="https://github.com/blessed0x/macos-debloater">macos-debloater ↗</a></p>
+
+    <p>Every debloat thread on the internet makes the same claim — "disable background services, get your RAM back" — and almost none of them publish a <em>measurement</em>. A before number you can reproduce and an after number tied to a named machine. This post ships the harness, a real before snapshot from an 8 GB Apple M1 running macOS Sequoia 15.7.4, and the actual dry-run plan <a href="https://github.com/blessed0x/macos-debloater">macos-debloater</a> resolves on this exact machine. What it deliberately doesn't ship is an invented after number — the harness below is how you produce yours.</p>
+
+    <h2>The catalog, first</h2>
+    <p>macOS boots roughly 200 background services. The <a href="https://github.com/blessed0x/macos-debloater">macos-debloater</a> catalog carries <strong>201 entries</strong> across four risk tiers, and every entry must resolve to a plist that actually exists on your macOS before it gets touched. The resolved plan shifts by OS version — on this Sequoia 15.x machine, Mode 1 resolves to 65 services:</p>
+
+    <table>
+      <tr><th>Mode</th><th>Services disabled</th><th>What you lose</th></tr>
+      <tr><td>1 · Safe</td><td>65</td><td>Telemetry, analytics, diagnostics, Siri / Apple Intelligence backends</td></tr>
+      <tr><td>2 · Balanced</td><td>105</td><td>+ iCloud extras, Maps, media, App Store, network-sharing</td></tr>
+      <tr><td>3 · Aggressive</td><td>152</td><td>+ Spotlight, Find My, Messages, FaceTime, AirDrop, Time Machine</td></tr>
+      <tr><td>4 · Dangerous</td><td>198</td><td>+ thermal daemon, Mail, Contacts, crash reporting — real risk</td></tr>
+    </table>
+
+    <h2>The harness</h2>
+    <p>This is the exact script used for the numbers below — page-accurate <code>vm_stat</code> parsing (Apple Silicon pages are 16 KB, and getting that wrong fakes your results by 4x), launchd job counts for the gui domain, and total resident memory. Save it, run it before, run it after, diff.</p>
+
+<pre><code>#!/usr/bin/env bash
+# ram-baseline.sh — snapshot macOS memory + launchd state
+echo "== machine =="
+sw_vers -productVersion
+sysctl -n machdep.cpu.brand_string
+echo "RAM total: $(( $(sysctl -n hw.memsize) / 1073741824 )) GB"
+echo "== launchd jobs (gui domain) =="
+launchctl list | wc -l | tr -d ' '
+echo "== memory pages =="
+PSIZE=$(pagesize)
+vm_stat | awk -v ps="$PSIZE" '
+/Pages free/        {free=$NF}
+/Pages active/      {active=$NF}
+/Pages inactive/    {inactive=$NF}
+/Pages speculative/ {spec=$NF}
+/Pages purgeable/   {purge=$NF}
+/Pages wired down/  {wired=$NF}
+/Pages compressed/  {comp=$NF}
+END {
+  gsub(/\./,"",free); gsub(/\./,"",active); gsub(/\./,"",inactive)
+  gsub(/\./,"",spec); gsub(/\./,"",purge); gsub(/\./,"",wired); gsub(/\./,"",comp)
+  printf "free        %6.0f MB\n", free*ps/1048576
+  printf "active      %6.0f MB\n", active*ps/1048576
+  printf "inactive    %6.0f MB\n", inactive*ps/1048576
+  printf "speculative %6.0f MB\n", spec*ps/1048576
+  printf "purgeable   %6.0f MB\n", purge*ps/1048576
+  printf "wired       %6.0f MB\n", wired*ps/1048576
+  printf "compressed  %6.0f MB\n", comp*ps/1048576
+  printf "available~  %6.0f MB\n", (free+inactive+purge)*ps/1048576
+}'
+echo "== resident memory, all processes =="
+ps -axo rss= | awk '{s+=$1} END {printf "%.2f GB\n", s/1048576}'</code></pre>
+
+    <h2>Before: the real snapshot</h2>
+    <p>MacBook Air (M1, 2020), 8 GB RAM, macOS Sequoia 15.7.4, mid-session with browsers, editors and an agent runtime open — a realistic "my Mac feels tight" state, not a freshly-rebooted showroom floor:</p>
+
+    <table>
+      <tr><th>Metric</th><th>Before</th></tr>
+      <tr><td>launchd jobs (gui domain)</td><td><strong>362</strong></td></tr>
+      <tr><td>Pages free</td><td>64 MB</td></tr>
+      <tr><td>Pages active</td><td>1,876 MB</td></tr>
+      <tr><td>Pages inactive</td><td>1,860 MB</td></tr>
+      <tr><td>Pages wired</td><td>2,484 MB</td></tr>
+      <tr><td>Available (free+inactive+purgeable)</td><td><strong>~1,931 MB</strong></td></tr>
+      <tr><td>Total resident, all processes</td><td><strong>4.33 GB</strong></td></tr>
+    </table>
+
+    <p>64 MB of free pages on an 8 GB machine. That's the "why" in one line.</p>
+
+    <h2>What Mode 1 resolves to on this machine</h2>
+    <p>Dry-run first — it works with SIP enabled, changes nothing, and prints the resolved plan. On this machine, Mode 1 resolved to <strong>65 services</strong> and <strong>142 commands</strong> (each service gets a <code>launchctl bootout</code> to stop the running instance now, plus a <code>launchctl disable</code> to keep it from coming back at boot). The head of the plan tells you exactly which families go:</p>
+
+<pre><code>Plan - 65 service(s) to disable:
+   gui  safe  com.apple.generativeexperiencesd     Generative AI experiences
+   gui  safe  com.apple.intelligencecontextd         Apple Intelligence context runtime
+   gui  safe  com.apple.intelligenceflowd            Apple Intelligence flow runtime
+   gui  safe  com.apple.intelligenceplatformd        Apple Intelligence platform daemon
+   gui  safe  com.apple.knowledge-agent              Knowledge / suggestion agent
+   gui  safe  com.apple.knowledgeconstructiond       Knowledge graph construction
+   gui  safe  com.apple.mlruntimed                   Machine learning runtime
+   gui  safe  com.apple.naturallanguaged             Natural language framework daemon
+   gui  safe  com.apple.analyticsagent               Analytics agent
+   gui  safe  com.apple.ap.adprivacyd                Ad privacy daemon
+   gui  safe  com.apple.ap.promotedcontentd          Promoted content / ads
+   gui  safe  com.apple.appleseed.seedusaged         AppleSeed usage reporter
+   ...</code></pre>
+
+    <p>That's the whole Apple Intelligence / on-device-ML family plus the analytics and ads daemons — the exact services that spin up models you never asked to run. This is also the honest caveat: these daemons are <em>idle</em> most of the time, so their contribution is a handful of resident MB each plus wakeup traffic. The bigger levers for raw RAM are the higher modes (and the optimization tweaks: Spotlight indexing, animations). Measure, don't guess.</p>
+
+    <h2>Measuring after — properly</h2>
+    <ol>
+      <li>Re-run the harness <strong>at a comparable moment</strong> — same apps open, similar workload. Memory numbers move with what you're doing; comparing a rebooted quiet machine against a mid-session one measures nothing.</li>
+      <li>Compare four numbers: <strong>launchd job count</strong> (the cleanest delta — disabled services stop booting and get booted out), <strong>total resident</strong>, <strong>pages free + available</strong>, and the top-10 RSS table.</li>
+      <li>Let it settle a few minutes after the run — some XPC services respawn lazily before they notice they're disabled.</li>
+    </ol>
+    <p>We kept this run read-only (dry-run, no changes applied on the test machine), so we're publishing no after number here — the harness above is what produces yours, and we'd rather teach the measurement than invent the result.</p>
+
+    <h2>Doing it yourself, safely</h2>
+    <p>macos-debloater writes the same launchd disabled database <code>launchctl disable</code> writes — nothing under <code>/System</code>, no plists deleted, and every run snapshots the previous state to <code>/Library/Application Support/macos-debloater/backups/</code> before touching anything. A hard deny list refuses boot-critical services like <code>WindowServer</code> even if you type them by hand. Real runs need root and SIP disabled; dry-run, list, and restore work without it. <strong>Restore</strong> is one menu option — undo the last run or re-enable the entire catalog.</p>
+
+    <p>Preview first, then apply:</p>
+<pre><code># preview (no changes, works with SIP on):
+MODE=1 DRY_RUN=1 AUTO_APPLY=1   # in the config, or pick Dry-run in the menu
+sudo ./macos-debloater.sh
+
+# apply for real (root + SIP off):
+MODE=1 DRY_RUN=0 AUTO_APPLY=1
+sudo ./macos-debloater.sh</code></pre>
+
+    <p>Mode 4 exists, includes the thermal daemon, and is double-confirmed for a reason — read the README's warning section before you go anywhere near it. On a laptop, removing thermal throttling is hardware-damage territory.</p>
+
+    <h2>The honest summary</h2>
+    <p>Telemetry daemons are cheap; Apple Intelligence runtimes and Spotlight indexing are not. Whether Mode 1 frees 80 MB or 800 MB depends on your machine, your workload, and which services you actually had running — which is precisely why the number belongs to the harness and not to a blog post. Run it before, run it after, and you'll have the only RAM claim that matters: yours.</p>
+
+    <p class="post-cta">→ <a href="https://github.com/blessed0x/macos-debloater">macos-debloater on GitHub</a> · <a href="/blog/pyzule-vs-xkvm-ios-injector.html">related: pyzule-rw vs xkvm</a> · <a href="/">back to the arsenal</a></p>
+  </main>
+
+  <footer class="footer" style="border-top:1px solid rgba(236,236,236,.12)">
+    <div class="container footer-bottom" style="display:flex;justify-content:space-between;flex-wrap:wrap;gap:12px">
+      <span>© 2026 blessed0x · built from scratch — no frameworks</span>
+      <a href="/blog/">blog</a> · <a href="/">home</a>
+    </div>
+  </footer>
+</body>
+</html>
