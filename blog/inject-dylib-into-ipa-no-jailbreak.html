@@ -1,0 +1,124 @@
+<!doctype html>
+<html lang="en" class="no-js">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>How to inject a dylib into an IPA without a jailbreak — pure Go, no Python — blessed0x blog</title>
+  <meta name="description" content="Step-by-step: inject a dylib into an IPA, re-sign it, and sideload it on iOS 17+ with xkvm — the pure-Go CLI that replaces the pyzule/cyan Python stack. Real commands, no jailbreak required.">
+  <meta name="robots" content="index, follow">
+  <link rel="canonical" href="https://blessed0x.github.io/blog/inject-dylib-into-ipa-no-jailbreak.html">
+  <meta property="og:type" content="article">
+  <meta property="og:title" content="How to inject a dylib into an IPA without a jailbreak (pure Go, no Python)">
+  <meta property="og:description" content="The full pipeline in real commands: fetch an app, inject a dylib, re-sign, install over a CoreDevice tunnel. xkvm does in one static binary what the pyzule/cyan Python stack did in a venv.">
+  <meta property="og:url" content="https://blessed0x.github.io/blog/inject-dylib-into-ipa-no-jailbreak.html">
+  <link rel="stylesheet" href="/assets/css/style.css">
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "Article",
+    "headline": "How to inject a dylib into an IPA without a jailbreak — pure Go, no Python",
+    "description": "A step-by-step walkthrough of injecting a dylib into an IPA, re-signing it, and sideloading it on iOS 17+ using xkvm, the pure-Go IPA tweak injector — no jailbreak, no Python environment.",
+    "datePublished": "2026-09-08",
+    "dateModified": "2026-09-08",
+    "author": { "@type": "Person", "name": "blessed0x", "url": "https://github.com/blessed0x" },
+    "publisher": { "@type": "Person", "name": "blessed0x", "url": "https://blessed0x.github.io/" },
+    "mainEntityOfPage": "https://blessed0x.github.io/blog/inject-dylib-into-ipa-no-jailbreak.html",
+    "about": ["iOS", "IPA", "dylib injection", "sideloading", "Mach-O", "Go", "xkvm"]
+  }
+  </script>
+</head>
+<body class="blog-page">
+  <a class="skip-link" href="#main">Skip to content</a>
+  <nav class="blog-nav">
+    <div class="container blog-nav-inner">
+      <a class="logo" href="/" aria-label="blessed0x home"><span class="logo-mark">0x</span>blessed0x</a>
+      <a class="ulink" href="/blog/">← all posts</a>
+    </div>
+  </nav>
+
+  <main id="main" class="post">
+    <p class="post-kicker">blog / ios-re</p>
+    <h1>How to inject a dylib into an IPA without a jailbreak — pure Go, no Python</h1>
+    <p class="post-meta">blessed0x · 2026-09-08 · ~7 min read · <a href="https://github.com/blessed0x/xkvm-ios-injector">xkvm-ios-injector ↗</a></p>
+
+    <p>Every "inject a tweak into an IPA" tutorial funnels you into a GUI and a Python venv. Sideloadly does the clicking for you, pyzule does the piping, and somewhere in between a dozen <code>pip install</code>s are quietly version-drifting. This post is the terminal version: the whole pipeline — fetch an app, inject a dylib, re-sign the container, install it on a device — in real commands, from <a href="https://github.com/blessed0x/xkvm-ios-injector">xkvm</a>, a single static Go binary. No jailbreak, no Python, no venv, no drama.</p>
+
+    <h2>What injection actually is (two moving parts)</h2>
+    <p>An IPA is a zip containing a <code>.app</code> bundle. Inside it, the binary is a Mach-O file, and "injecting a tweak" means doing exactly two things:</p>
+    <ol>
+      <li><strong>Add a load command.</strong> The tweak dylib gets referenced via an <code>LC_LOAD_DYLIB</code> pointing at a sane install path — <code>@rpath</code>, <code>@executable_path</code>, or <code>/usr/lib</code> depending on the tweak's layout. Get this wrong and the app won't launch; get the <em>ordering</em> wrong and it launches but crashes on load.</li>
+      <li><strong>Rebuild the code signature.</strong> Every Mach-O in the bundle carries a signature covering its own bytes. Touch the binary and the signature is dead — install the app as-is and iOS rejects it. The signature has to be recomputed after the load command lands, which is the step most hand-rolled scripts fumble.</li>
+    </ol>
+    <p>That's the entire trick. The GUI tools just hide those two steps behind a progress bar. A CLI doesn't need to hide anything.</p>
+
+    <h2>Install xkvm (one line, no Go needed)</h2>
+<pre><code># macOS / Linux — downloads the release binary, puts it on PATH:
+curl -fsSL https://raw.githubusercontent.com/blessed0x/xkvm-ios-injector/main/scripts/install.sh | bash
+
+# Windows (PowerShell):
+irm https://raw.githubusercontent.com/blessed0x/xkvm-ios-injector/main/scripts/install.ps1 | iex
+
+# …or if you already have Go 1.26+:
+go install github.com/blessed0x/xkvm-ios-injector/cmd/xkvm@latest</code></pre>
+    <p>Sanity check: <code>xkvm --help</code>. If you'd rather click than type, <code>xkvm tui</code> asks the same questions one at a time and drives the exact same engine underneath.</p>
+
+    <h2>The pipeline, end to end</h2>
+
+    <h3>1 · Get the app you own</h3>
+    <p>You need a decrypted IPA — an app you have the right to modify. xkvm downloads straight from the App Store by Apple ID, sinfs included, no separate downloader tool:</p>
+<pre><code>xkvm decrypt 310633997 --apple-id you@example.com --password …   # by numeric Apple ID
+xkvm decrypt https://apps.apple.com/us/app/…/id310633997          # …or by link, or bundle id
+xkvm decrypt --logout                                            # forget the saved login</code></pre>
+
+    <h3>2 · Get the tweak</h3>
+    <p>Bring your own <code>.dylib</code>, or resolve one straight from a Cydia repo by bundle id — dependencies included, recursively:</p>
+<pre><code>xkvm -i App.ipa -o Patched.ipa --fetch com.example.tweak</code></pre>
+    <p>If you're converting an existing jailbreak package instead, the converters live in the same binary: <code>xkvm rootless -i tweak.deb -o tweak-rootless.deb</code> (rootful → rootless), <code>xkvm roothide</code>, <code>xkvm undeb</code>, <code>xkvm debify</code>.</p>
+
+    <h3>3 · Inject and re-sign</h3>
+<pre><code># one tweak:
+xkvm -i App.ipa -o Patched.ipa -f MyTweak.dylib
+
+# several tweaks at once, fakesigned (AppSync / TrollStore path):
+xkvm -i App.ipa -o Patched.ipa -f TweakA.dylib -f TweakB.deb -s
+
+# swap in the real ElleKit hooking runtime, or inject the bundled
+# sideload-repair dylib set (App Store / keychain login fixes):
+xkvm -i App.ipa -o Patched.ipa -f Tweak.dylib --ellekit
+xkvm -i App.ipa -o Patched.ipa --patch</code></pre>
+    <p>Load commands get wired with the correct <code>@rpath</code>/<code>@executable_path</code> references and every binary is re-signed — pure-Go Apple-format signatures, deterministic: same input in, same bytes out.</p>
+
+    <h3>4 · Check before you install</h3>
+    <p>Merged tweaks crash at launch when a bundle-relative dependency doesn't resolve. Don't discover that on the phone:</p>
+<pre><code>xkvm check -i Patched.ipa</code></pre>
+
+    <h3>5 · Install over a CoreDevice tunnel, no Xcode, no SideStore</h3>
+<pre><code>xkvm device list                      # who's plugged in
+xkvm device pair                      # tap "Trust" on the phone, run again
+xkvm device install Patched.ipa       # stream it onto the device
+xkvm device launch com.example.app    # run it, get the pid
+xkvm device syslog                    # parsed logs, Ctrl-C to stop</code></pre>
+    <p>On iOS 17+, <code>install</code>/<code>launch</code>/<code>screenshot</code> need a developer tunnel — xkvm starts one in the background when an operation hits that gate and retries over it. If you'd rather run the tunnel yourself, <code>XKVM_NO_AUTO_TUNNEL=1</code> prints the manual command instead. <code>pair</code>/<code>info</code>/<code>battery</code>/<code>apps</code> need no tunnel at all.</p>
+
+    <h2>The honest part about signing</h2>
+    <p>"Without a jailbreak" here means without a <em>Python</em> jailbreak-tooling stack — not without Apple's signature policy. A stock, non-jailbroken device still only installs apps signed by a certificate it accepts. That's the two lanes:</p>
+    <ul>
+      <li><strong>Fakesign (<code>-s</code>)</strong> — for AppSync or TrollStore installers, which don't validate the signature against Apple. Fast, fine for testing your own devices.</li>
+      <li><strong>Real signing</strong> — your own dev certificate / provisioning, for a stock device. xkvm does the load-command surgery and re-signing; the certificate is still yours to supply. The <code>--patch</code> repair dylib set exists precisely because sideloaded apps lose App Store / keychain entitlements and then misbehave.</li>
+    </ul>
+    <p>What xkvm actually kills is the environment roulette: the venv, the <code>pip</code> version drift, the Python-runtime assumptions. One static binary behaves the same on your laptop as it does in CI — which is exactly why the next section matters.</p>
+
+    <h2>Where the CLI beats the GUI</h2>
+    <p>Sideloadly is a great clicker. It is not a pipeline. The moment your workflow is "inject, verify, install, syslog" more than once, or across a fleet, or on a schedule, a GUI is a human in the loop with nothing to do. xkvm's whole surface is scriptable — flags, exit codes, deterministic output — so the same commands that work on your desk run in a GitHub Actions matrix. That's the angle the tutorial farms can't serve: they write for people who want to click once. This is for people who want it to <em>repeat</em>.</p>
+
+    <p class="post-cta">→ <a href="https://github.com/blessed0x/xkvm-ios-injector">xkvm-ios-injector on GitHub</a> · <a href="/blog/pyzule-vs-xkvm-ios-injector.html">related: pyzule-rw vs xkvm — the comparison</a> · <a href="/">back to the arsenal</a></p>
+  </main>
+
+  <footer class="footer" style="border-top:1px solid rgba(236,236,236,.12)">
+    <div class="container footer-bottom" style="display:flex;justify-content:space-between;flex-wrap:wrap;gap:12px">
+      <span>© 2026 blessed0x · built from scratch — no frameworks</span>
+      <a href="/blog/">blog</a> · <a href="/">home</a>
+    </div>
+  </footer>
+</body>
+</html>
