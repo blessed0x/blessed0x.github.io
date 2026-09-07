@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="en" class="no-js">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>blog — blessed0x: iOS reverse engineering, Go tooling, MCP</title>
+  <meta name="description" content="Notes from blessed0x on building iOS reverse-engineering tooling in pure Go — headless Scratch VMs over MCP, IPA tweak injection, macOS debloating, and device control without Python.">
+  <meta name="robots" content="index, follow">
+  <link rel="canonical" href="https://blessed0x.github.io/blog/">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="blog — blessed0x">
+  <meta property="og:url" content="https://blessed0x.github.io/blog/">
+  <link rel="stylesheet" href="/assets/css/style.css">
+</head>
+<body class="blog-page">
+  <a class="skip-link" href="#main">Skip to content</a>
+  <nav class="blog-nav">
+    <div class="container blog-nav-inner">
+      <a class="logo" href="/" aria-label="blessed0x home"><span class="logo-mark">0x</span>blessed0x</a>
+      <a class="ulink" href="/">← home</a>
+    </div>
+  </nav>
+
+  <main id="main" class="blog-main">
+    <p class="post-kicker">blessed0x / blog</p>
+    <h1>Notes on shipping bytes.</h1>
+    <p class="post-meta">Reverse engineering, pure-Go tooling, MCP, and the machines that run them.</p>
+
+    <article class="post-card">
+      <p class="post-meta">2026-09-07 · mcp</p>
+      <h2><a href="/blog/headless-scratch-vm-over-mcp.html">A headless Scratch VM over MCP: 112 tools for AI agents to build and publish Scratch projects</a></h2>
+      <p>The first standalone headless Scratch VM over the Model Context Protocol — load a .sb3, press green flag, step frames, read every thread, from tool calls. How the gaps (no renderer, no clicks, no seeded RNG) get patched, not hidden.</p>
+      <a class="ulink" href="/blog/headless-scratch-vm-over-mcp.html">read →</a>
+    </article>
+
+    <article class="post-card">
+      <p class="post-meta">2026-09-07 · ios-re</p>
+      <h2><a href="/blog/pyzule-vs-xkvm-ios-injector.html">pyzule-rw vs xkvm-ios-injector: the pure-Go IPA tweak injector cyan asked for</a></h2>
+      <p>The pyzule lineage is Python, and its own author is begging for a compiled rewrite. An honest feature-by-feature comparison of cyan vs the pure-Go static-binary slot, and when each one wins.</p>
+      <a class="ulink" href="/blog/pyzule-vs-xkvm-ios-injector.html">read →</a>
+    </article>
+  </main>
+
+  <footer class="footer" style="border-top:1px solid rgba(236,236,236,.12)">
+    <div class="container footer-bottom" style="display:flex;justify-content:space-between;flex-wrap:wrap;gap:12px">
+      <span>© 2026 blessed0x · built from scratch — no frameworks</span>
+      <a href="/">home</a>
+    </div>
+  </footer>
+</body>
+</html>
