@@ -460,3 +460,16 @@ html.js .reveal.in-view { animation: slideUp 0.55s cubic-bezier(0.4, 0, 0.2, 1) 
   html.js .reveal.in-view { animation: none; }
   * { transition-duration: 0.01ms !important; }
 }
+
+
+/* hero field — animated constellation data-layer */
+#hero-field {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  opacity: 0.9;
+  will-change: transform;
+}
+.hero .container { position: relative; z-index: 1; }
+@media (prefers-reduced-motion: reduce) { #hero-field { display: none; } }
