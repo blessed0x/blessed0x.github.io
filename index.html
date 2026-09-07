@@ -1,0 +1,165 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Blessed0x — iOS Reverse Engineering · Go · macOS Debloating</title>
+  <meta name="description" content="Blessed0x — indie developer building open-source iOS reverse-engineering tooling. Inject tweaks and dylibs into IPA files, debloat macOS, and run Scratch headlessly over MCP. Pure Go, byte-faithful.">
+  <meta name="author" content="Blessed0x">
+  <meta name="robots" content="index, follow">
+  <link rel="canonical" href="https://blessed0x.github.io/">
+  <link rel="sitemap" type="application/xml" title="Sitemap" href="/sitemap.xml">
+
+  <!-- Open Graph -->
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="Blessed0x — iOS Reverse Engineering · Go · macOS Debloating">
+  <meta property="og:description" content="Open-source iOS reverse-engineering tooling: inject tweaks &amp; dylibs into IPA files, debloat macOS, and run Scratch headlessly over MCP.">
+  <meta property="og:url" content="https://blessed0x.github.io/">
+  <meta property="og:site_name" content="Blessed0x">
+
+  <!-- Twitter -->
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:title" content="Blessed0x — iOS Reverse Engineering · Go · macOS Debloating">
+  <meta name="twitter:description" content="Open-source iOS reverse-engineering tooling: inject tweaks &amp; dylibs into IPA files, debloat macOS, run Scratch headlessly over MCP.">
+
+  <link rel="stylesheet" href="/assets/css/style.css">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%23131336'/%3E%3Ctext x='16' y='22' font-family='monospace' font-size='14' font-weight='bold' fill='%23E100FF' text-anchor='middle'%3E0x%3C/text%3E%3C/svg%3E">
+
+  <!-- Structured data -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "Person",
+    "name": "Blessed0x",
+    "url": "https://blessed0x.github.io/",
+    "jobTitle": "Independent developer — iOS reverse engineering & Go",
+    "description": "Open-source developer building iOS reverse-engineering tools: IPA tweak injection, dylib injection, macOS debloating, and a headless Scratch VM over MCP.",
+    "knowsAbout": ["iOS reverse engineering", "dylib injection", "Mach-O", "IPA sideloading", "Go", "macOS internals", "launchd", "Model Context Protocol"],
+    "sameAs": ["https://github.com/blessed0x"]
+  }
+  </script>
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "WebSite",
+    "name": "Blessed0x",
+    "url": "https://blessed0x.github.io/"
+  }
+  </script>
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to content</a>
+
+  <header class="site-header">
+    <nav class="nav" aria-label="Primary">
+      <a class="nav-brand" href="/">blessed0x<span class="cursor">_</span></a>
+      <ul class="nav-links">
+        <li><a href="#about">whoami</a></li>
+        <li><a href="#projects">arsenal</a></li>
+        <li><a href="#skills">tooling</a></li>
+        <li><a href="#contact">contact</a></li>
+      </ul>
+    </nav>
+  </header>
+
+  <main id="main">
+    <!-- HERO -->
+    <section class="hero" aria-label="Introduction">
+      <h1 class="hero-name">Blessed0x</h1>
+      <p class="hero-tagline">iOS reverse engineering · Go · macOS debloating</p>
+      <pre class="terminal" aria-label="terminal introduction"><code><span class="prompt">$</span> whoami
+blessed0x · indie dev, iOS RE nerd, Go purist
+
+<span class="prompt">$</span> cat 道.md
+· everything is a file: IPA is a zip, signatures are DER, firmware is tar. open them.
+· one binary walks into any machine. no python env, no drama.
+· converters stay byte-faithful to upstream tools or the diff goes in the docs.
+· behavior change means test first. network paths get fakes, always.
+
+<span class="prompt">$</span> ./blessed0x --stack
+<span class="ok">✓</span> dylib injection     <span class="ok">✓</span> Mach-O &amp; codesign
+<span class="ok">✓</span> Go tooling          <span class="ok">✓</span> macOS internals</code></pre>
+      <p class="hero-text">I put dylibs where they don't belong. I write reverse-engineering tooling that ships as a single static binary, keeps its bytes honest, and never asks for a Python environment. Everything here is open source, built from scratch, and aimed at people who'd rather read a hex dump than a changelog.</p>
+    </section>
+
+    <!-- PROJECTS -->
+    <section id="projects" class="section" aria-label="Projects">
+      <h2 class="section-title">// arsenal</h2>
+      <p class="section-sub">Open-source tools, in pure Go and shell.</p>
+
+      <div class="grid">
+        <article class="card">
+          <header class="card-head">
+            <h3><a href="https://github.com/blessed0x/xkvm-ios-injector" rel="external">xkvm-ios-injector</a></h3>
+            <span class="lang">Go</span>
+          </header>
+          <p class="card-desc">Inject tweaks &amp; dylibs into IPA files — a pure-Go rewrite of the cyan/pyzule-rw bloodline. Sideload injected apps, extract tweaks back out, and convert between jailbreak package layouts. Byte-faithful to upstream tools, no Python required.</p>
+          <ul class="tags" aria-label="topics">
+            <li>ios</li><li>jailbreak</li><li>tweak</li><li>dylib</li><li>ipa-injection</li><li>sideloading</li>
+          </ul>
+        </article>
+
+        <article class="card">
+          <header class="card-head">
+            <h3><a href="https://github.com/blessed0x/macos-debloater" rel="external">macos-debloater</a></h3>
+            <span class="lang">Shell</span>
+          </header>
+          <p class="card-desc">Debloat macOS — disable the services you don't use. Mode 1–4, TUI, enterprise config, or manual pick. Trim launchd agents, cut background noise, and take back RAM without touching what you actually need.</p>
+          <ul class="tags" aria-label="topics">
+            <li>macos</li><li>debloat</li><li>launchd</li><li>privacy</li><li>optimization</li><li>tui</li>
+          </ul>
+        </article>
+
+        <article class="card">
+          <header class="card-head">
+            <h3><a href="https://github.com/blessed0x/scratch-unified-mcp" rel="external">scratch-unified-mcp</a></h3>
+            <span class="lang">Python</span>
+          </header>
+          <p class="card-desc">The first standalone headless Scratch VM over MCP — 108 tools for AI agents to build, playtest, and publish Scratch projects. Turbowarp-powered, no browser needed, fully scriptable.</p>
+          <ul class="tags" aria-label="topics">
+            <li>mcp</li><li>scratch</li><li>ai-agents</li><li>headless-vm</li><li>turbowarp</li>
+          </ul>
+        </article>
+      </div>
+    </section>
+
+    <!-- SKILLS -->
+    <section id="skills" class="section" aria-label="Skills and tooling">
+      <h2 class="section-title">// tooling</h2>
+      <div class="skill-list">
+        <div class="skill-group">
+          <h3>Reverse engineering</h3>
+          <p>Mach-O internals, dylib injection, IPA tweak injection, codesign forgery, binary patching, firmware archaeology.</p>
+        </div>
+        <div class="skill-group">
+          <h3>Languages</h3>
+          <p>Go (the daily driver), shell, Python. Static binaries, no runtime drama.</p>
+        </div>
+        <div class="skill-group">
+          <h3>Platforms</h3>
+          <p>iOS &amp; macOS internals — launchd, CoreDevice, usbmuxd, entitlements, sandboxing. Linux when it behaves.</p>
+        </div>
+        <div class="skill-group">
+          <h3>Protocols &amp; plumbing</h3>
+          <p>Model Context Protocol (MCP) servers, USB device pairing, byte-exact format conversion.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- CONTACT -->
+    <section id="contact" class="section" aria-label="Contact">
+      <h2 class="section-title">// contact</h2>
+      <p class="contact-text">Found a bug, want a feature, or just want to talk binaries? The inbox is open.</p>
+      <ul class="contact-links">
+        <li><a href="https://github.com/blessed0x" rel="external">github.com/blessed0x</a></li>
+        <li><a href="mailto:xscope@proton.me">xscope@proton.me</a></li>
+      </ul>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <p>Built from scratch. No frameworks, no Jekyll, no JavaScript — just semantic HTML and one CSS file.</p>
+    <p class="footer-meta">Blessed0x · <a href="/sitemap.xml">sitemap</a> · <a href="/robots.txt">robots</a></p>
+  </footer>
+</body>
+</html>

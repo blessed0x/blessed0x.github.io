@@ -1,0 +1,22 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>0x404 — Not Found · Blessed0x</title>
+  <meta name="robots" content="noindex">
+  <link rel="stylesheet" href="/assets/css/style.css">
+</head>
+<body>
+  <main class="hero" style="min-height:70vh;display:flex;flex-direction:column;align-items:center;justify-content:center;">
+    <p class="error-code">0x404</p>
+    <p class="error-text">segfault: page not found. the bytes you're after never made it into memory.</p>
+    <pre class="terminal" aria-label="error output"><code><span class="prompt">$</span> gdb ./site
+(gdb) run /missing-page
+Program received signal SIGSEGV, Segmentation fault.
+0x0000000000000404 in ?? ()
+(gdb) quit</code></pre>
+    <p><a href="/">← back to blessed0x</a></p>
+  </main>
+</body>
+</html>
